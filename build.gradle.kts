@@ -29,4 +29,7 @@ tasks.cyclonedxBom {
     componentVersion = "1.0.0"
     includeBomSerialNumber = true
     xmlOutput.unsetConvention()
+    val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+    // Asignar ese número a la versión del documento SBOM
+    version = runNumber
 }
