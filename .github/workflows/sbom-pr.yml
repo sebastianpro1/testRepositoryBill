@@ -39,5 +39,7 @@ jobs:
           name: sbom-antshrike
           # Por defecto, el plugin genera los archivos en build/reports/
           path: |
+            build/reports/bom.json
             **/build/reports/bom.json
+          if-no-files-found: error # Esto hará que el pipeline falle si no encuentra el archivo, avisándote de inmediato
           retention-days: 14 # Tiempo que se guardará el archivo en GitHub

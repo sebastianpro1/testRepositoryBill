@@ -1,5 +1,8 @@
 import org.cyclonedx.model.Component
 
+group = "com.validation"
+version = "1.0.0"
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.hilt.android) apply false
