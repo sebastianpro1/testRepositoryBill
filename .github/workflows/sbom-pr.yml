@@ -1,0 +1,43 @@
+name: Generate SBOM on Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened] # Se ejecuta al abrir, actualizar o reabrir el PR
+    branches:
+      - main # O la rama base que utilices (ej. master, develop)
+      - dev
+
+jobs:
+  sbom-generation:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurar el entorno de Java (requerido para Gradle)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle' # Automatiza la caché de dependencias para que sea más rápido
+
+      # 3. Otorgar permisos de ejecución al script de Gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 4. Ejecutar la tarea de CycloneDX para generar el SBOM
+      - name: Generate CycloneDX SBOM
+        run: ./gradlew cyclonedxBom
+
+      # 5. Archivar y documentar el SBOM generado como artefacto del PR
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-antshrike
+          # Por defecto, el plugin genera los archivos en build/reports/
+          path: |
+            **/build/reports/bom.json
+          retention-days: 14 # Tiempo que se guardará el archivo en GitHub
