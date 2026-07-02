@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     tasks.cyclonedxDirectBom {
-        // Opción recomendada: Usar listOf() en lugar de [...]
+        // Recomended Option: Use listOf() en lugar de [...]
         includeConfigs.set(listOf("releaseRuntimeClasspath"))
         skipConfigs.set(listOf("androidTestRuntimeClasspath", "testRuntimeClasspath"))
 
@@ -29,4 +29,7 @@ tasks.cyclonedxBom {
     componentVersion = "1.0.0"
     includeBomSerialNumber = true
     xmlOutput.unsetConvention()
+    val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+    // Asignar ese número a la versión del documento SBOM
+    version = runNumber
 }
