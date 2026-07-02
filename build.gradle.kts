@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     tasks.cyclonedxDirectBom {
-        // Opción recomendada: Usar listOf() en lugar de [...]
+        // Recomended Option: Use listOf() en lugar de [...]
         includeConfigs.set(listOf("releaseRuntimeClasspath"))
         skipConfigs.set(listOf("androidTestRuntimeClasspath", "testRuntimeClasspath"))
 
