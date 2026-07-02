@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bom-test
-          # Por defecto, el plugin genera los archivos en ell build/reports/
+          # Por defecto, el plugin genera los archivos en build/reports/
           path: "build/reports/cyclonedx/abom.json"
           if-no-files-found: error # Esto hará que el pipeline falle si no encuentra el archivo, avisándote de inmediato
           retention-days: 14 # Tiempo que se guardará el archivo en GitHub
