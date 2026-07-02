@@ -36,8 +36,8 @@ jobs:
       - name: Upload SBOM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-antshrike
+          name: bom-test
           # Por defecto, el plugin genera los archivos en build/reports/
-          path: |
-            **/build/reports/bom.json
+          path: "build/reports/cyclonedx/bom.json"
+          if-no-files-found: error # Esto hará que el pipeline falle si no encuentra el archivo, avisándote de inmediato
           retention-days: 14 # Tiempo que se guardará el archivo en GitHub
