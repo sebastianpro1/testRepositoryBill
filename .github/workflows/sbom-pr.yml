@@ -8,7 +8,7 @@ on:
       - dev
 
 jobs:
-  sbom-generation:
+  sbom-generation-and-scan:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,15 @@ jobs:
       # 4. Ejecutar la tarea de CycloneDX para generar el SBOM
       - name: Generate CycloneDX SBOM
         run: ./gradlew cyclonedxBom
+
+      # 5. Instalar y Ejecutar Trivy para escanear el SBOM generado (Paso de Validación)
+      - name: Run Trivy Vulnerability Scan on SBOM
+        uses: aquasecurity/trivy-action@0.36.0  # Usamos una versión fija/pinned para control de cambios del QMS
+        with:
+          scan-type: 'sbom'
+          scan-target: 'build/reports/cyclonedx/bom.json'
+          format: 'table'
+          exit-code: '0' # Para este primer escenario de integración queremos que pase (0) solo para validar que lee el archivo.
 
       # 5. Archivar y documentar el SBOM generado como artefacto del PR
       - name: Upload SBOM Artifact
