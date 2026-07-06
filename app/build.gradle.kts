@@ -46,6 +46,7 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
+    implementation("com.google.android.gms:play-services-basement:18.0.0")
     implementation(libs.core.ktx)
 
     //compose
