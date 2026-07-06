@@ -32,6 +32,11 @@ jobs:
       - name: Generate CycloneDX SBOM
         run: ./gradlew cyclonedxBom
 
+      - name: Validate SBOM JSON syntax
+        run: |
+          cat ./build/reports/cyclonedx/bom.json | python3 -m json.tool > /dev/null
+          echo "SBOM JSON is valid"
+
       # 5. Instalar Trivy
       - name: Install Trivy
         run: |
