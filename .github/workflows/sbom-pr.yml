@@ -48,7 +48,7 @@ jobs:
           trivy sbom ./build/reports/cyclonedx/bom.json \
             --format table \
             --exit-code 1 \
-            --severity HIGH,CRITICAL
+            --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
 
       # 5. Archivar y documentar el SBOM generado como artefacto del PR
       - name: Upload SBOM Artifact
