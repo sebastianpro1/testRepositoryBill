@@ -8,7 +8,7 @@ on:
       - dev
 
 jobs:
-  sbom-generation:
+  sbom-generation-and-scan:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,24 @@ jobs:
       # 4. Ejecutar la tarea de CycloneDX para generar el SBOM
       - name: Generate CycloneDX SBOM
         run: ./gradlew cyclonedxBom
+
+      - name: Validate SBOM JSON syntax
+        run: |
+          cat ./build/reports/cyclonedx/bom.json | python3 -m json.tool > /dev/null
+          echo "SBOM JSON is valid"
+
+      # 5. Instalar Trivy
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      # 6. Ejecutar Trivy directamente sobre el SBOM generado
+      - name: Scan SBOM with Trivy
+        run: |
+          trivy sbom ./build/reports/cyclonedx/bom.json \
+            --format table \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL
 
       # 5. Archivar y documentar el SBOM generado como artefacto del PR
       - name: Upload SBOM Artifact
