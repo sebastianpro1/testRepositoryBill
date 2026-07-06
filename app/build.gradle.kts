@@ -40,13 +40,14 @@ android {
             exclude(group = "androidx.compose.material", module = "material")
             exclude(group = "androidx.compose.material", module = "material-icons-core")
             exclude(group = "androidx.compose.material", module = "material-icons-extended")
+            force ("com.google.android.gms:play-services-basement:18.0.1")
         }
     }
 }
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
-    implementation("com.google.android.gms:play-services-basement:18.0.0")
+    implementation("com.google.android.gms:play-services-basement:18.0.1")
     implementation(libs.core.ktx)
 
     //compose
