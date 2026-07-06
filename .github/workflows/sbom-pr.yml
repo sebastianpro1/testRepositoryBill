@@ -34,7 +34,7 @@ jobs:
 
       # 5. Instalar y Ejecutar Trivy para escanear el SBOM generado (Paso de Validación)
       - name: Run Trivy Vulnerability Scan on SBOM
-        uses: aquasecurity/trivy-action@0.36.0  # Usamos una versión fija/pinned para control de cambios del QMS
+        uses: aquasecurity/trivy-action@0.20.0  # Usamos una versión fija/pinned para control de cambios del QMS
         with:
           scan-type: 'sbom'
           scan-target: 'build/reports/cyclonedx/bom.json'
