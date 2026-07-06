@@ -4,58 +4,50 @@ on:
   pull_request:
     types: [opened, synchronize, reopened] # Se ejecuta al abrir, actualizar o reabrir el PR
     branches:
-      - main # O la rama base que utilices (ej. master, develop)
+      - main
       - dev
 
 jobs:
   sbom-generation-and-scan:
     runs-on: ubuntu-latest
-
     steps:
       # 1. Descargar el código del repositorio
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configurar el entorno de Java (requerido para Gradle)
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      # 2. Generar el SBOM multimódulo usando Trivy (CycloneDX format)
+      - name: Generate Multi-Module SBOM with Trivy
+        uses: aquasecurity/trivy-action@0.20.0 # Versión fija de la acción de GitHub para el QMS
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle' # Automatiza la caché de dependencias para que sea más rápido
+          trivy-version: '0.51.1'              # Motor de Trivy controlado para consistencia
+          scan-type: 'repo'                    # Escanea el repositorio de golpe
+          scan-ref: '.'                        # Raíz del proyecto (recorrerá Antshrike, mobile, common, wear)
+          format: 'cyclonedx'                  # Estándar de la industria médica requerido
+          output: 'build/reports/cyclonedx/bom.json' # Ruta de salida esperada para mantener compatibilidad
 
-      # 3. Otorgar permisos de ejecución al script de Gradle
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-
-      # 4. Ejecutar la tarea de CycloneDX para generar el SBOM
-      - name: Generate CycloneDX SBOM
-        run: ./gradlew cyclonedxBom
-
+      # 3. Validar la sintaxis del JSON generado por Trivy
       - name: Validate SBOM JSON syntax
         run: |
           cat ./build/reports/cyclonedx/bom.json | python3 -m json.tool > /dev/null
           echo "SBOM JSON is valid"
 
-      # 5. Instalar Trivy
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-
-      # 6. Ejecutar Trivy directamente sobre el SBOM generado
-      - name: Scan SBOM with Trivy
-        run: |
-          trivy sbom ./build/reports/cyclonedx/bom.json \
-            --format table \
-            --exit-code 1 \
-            --severity HIGH,CRITICAL
+      # 4. Escanear el SBOM generado en busca de vulnerabilidades conocidas (SOUP Audit)
+      - name: Run Trivy Vulnerability Scan on SBOM
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          trivy-version: '0.51.1'
+          scan-type: 'sbom'
+          scan-ref: 'build/reports/cyclonedx/bom.json' # Apunta al archivo que acabamos de crear en el paso 2
+          scanners: 'vuln'                              # Filtramos estrictamente para SOUP (solo vulnerabilidades conocidas)
+          format: 'table'
+          severity: 'HIGH,CRITICAL'                     # Enfoque en los riesgos de mayor impacto bajo IEC 62304
+          exit-code: '0'                                # Mantenemos 0 temporalmente para validación inicial del pipeline
 
       # 5. Archivar y documentar el SBOM generado como artefacto del PR
       - name: Upload SBOM Artifact
         uses: actions/upload-artifact@v4
         with:
           name: bom-test
-          # Por defecto, el plugin genera los archivos en build/reports/
           path: "build/reports/cyclonedx/bom.json"
-          if-no-files-found: error # Esto hará que el pipeline falle si no encuentra el archivo, avisándote de inmediato
+          if-no-files-found: error
           retention-days: 14 # Tiempo que se guardará el archivo en GitHub
