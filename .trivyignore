@@ -1,0 +1,1 @@
+# Justification: The affected component belongs exclusively to the test/UI environment and is not compiled into the final production artifact of Antshrike. It poses no risk to patient safety nor does it compromise the integrity of medical data.
